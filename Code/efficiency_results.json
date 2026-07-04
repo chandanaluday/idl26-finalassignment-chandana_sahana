@@ -1,0 +1,58 @@
+[
+  {
+    "DATA": "cells",
+    "MODEL": "ResNet18",
+    "role": "best_original",
+    "parameter_count": 11172936,
+    "inference_latency_ms": 1.804
+  },
+  {
+    "DATA": "cells",
+    "MODEL": "GreenNet",
+    "role": "green",
+    "parameter_count": 36040,
+    "inference_latency_ms": 0.432
+  },
+  {
+    "DATA": "chest",
+    "MODEL": "VGG16",
+    "role": "best_original",
+    "parameter_count": 11054530,
+    "inference_latency_ms": 0.912
+  },
+  {
+    "DATA": "chest",
+    "MODEL": "GreenNet",
+    "role": "green",
+    "parameter_count": 34690,
+    "inference_latency_ms": 0.422
+  },
+  {
+    "DATA": "lesions",
+    "MODEL": "AlexNet",
+    "role": "best_original",
+    "parameter_count": 2743399,
+    "inference_latency_ms": 0.294
+  },
+  {
+    "DATA": "lesions",
+    "MODEL": "GreenNet",
+    "role": "green",
+    "parameter_count": 35911,
+    "inference_latency_ms": 0.413
+  },
+  {
+    "DATA": "orgs",
+    "MODEL": "ResNet18",
+    "role": "best_original",
+    "parameter_count": 11173323,
+    "inference_latency_ms": 1.715
+  },
+  {
+    "DATA": "orgs",
+    "MODEL": "GreenNet",
+    "role": "green",
+    "parameter_count": 35851,
+    "inference_latency_ms": 0.41
+  }
+]
