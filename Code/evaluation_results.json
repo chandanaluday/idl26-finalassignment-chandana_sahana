@@ -30,6 +30,16 @@
     "status": "PASS"
   },
   {
+    "DATA": "cells",
+    "MODEL": "GreenNet",
+    "test_accuracy": 96.11224788073662,
+    "test_precision": 95.8210133649926,
+    "test_recall": 96.0990003029241,
+    "test_f1": 95.84314272375359,
+    "target_accuracy": 90,
+    "status": "PASS"
+  },
+  {
     "DATA": "chest",
     "MODEL": "AlexNet",
     "test_accuracy": 88.62179487179486,
@@ -58,6 +68,16 @@
     "test_f1": 84.91615610274347,
     "target_accuracy": 87,
     "status": "PASS"
+  },
+  {
+    "DATA": "chest",
+    "MODEL": "GreenNet",
+    "test_accuracy": 86.21794871794873,
+    "test_precision": 89.50431034482759,
+    "test_recall": 82.13675213675214,
+    "test_f1": 84.05116561062304,
+    "target_accuracy": 87,
+    "status": "FAIL"
   },
   {
     "DATA": "lesions",
@@ -90,6 +110,16 @@
     "status": "PASS"
   },
   {
+    "DATA": "lesions",
+    "MODEL": "GreenNet",
+    "test_accuracy": 74.11471321695761,
+    "test_precision": 50.80411964619138,
+    "test_recall": 38.04118917500936,
+    "test_f1": 40.80200788009227,
+    "target_accuracy": 67,
+    "status": "PASS"
+  },
+  {
     "DATA": "orgs",
     "MODEL": "AlexNet",
     "test_accuracy": 87.18354430379746,
@@ -116,6 +146,16 @@
     "test_precision": 89.6887711031069,
     "test_recall": 89.00675178115492,
     "test_f1": 89.0801797617286,
+    "target_accuracy": 83,
+    "status": "PASS"
+  },
+  {
+    "DATA": "orgs",
+    "MODEL": "GreenNet",
+    "test_accuracy": 89.73953261927944,
+    "test_precision": 88.37654918875262,
+    "test_recall": 88.17469416245571,
+    "test_f1": 88.14843777964239,
     "target_accuracy": 83,
     "status": "PASS"
   }
