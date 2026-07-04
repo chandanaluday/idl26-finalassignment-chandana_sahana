@@ -1,0 +1,122 @@
+[
+  {
+    "DATA": "cells",
+    "MODEL": "AlexNet",
+    "test_accuracy": 92.25372698041508,
+    "test_precision": 92.19729793551947,
+    "test_recall": 91.39076627902215,
+    "test_f1": 91.5574875394763,
+    "target_accuracy": 90,
+    "status": "PASS"
+  },
+  {
+    "DATA": "cells",
+    "MODEL": "VGG16",
+    "test_accuracy": 93.10143232972815,
+    "test_precision": 92.01365425155616,
+    "test_recall": 93.23321764703705,
+    "test_f1": 92.40050947969422,
+    "target_accuracy": 90,
+    "status": "PASS"
+  },
+  {
+    "DATA": "cells",
+    "MODEL": "ResNet18",
+    "test_accuracy": 94.6214557147033,
+    "test_precision": 93.85991939503756,
+    "test_recall": 94.33238686092531,
+    "test_f1": 93.80046397207221,
+    "target_accuracy": 90,
+    "status": "PASS"
+  },
+  {
+    "DATA": "chest",
+    "MODEL": "AlexNet",
+    "test_accuracy": 88.62179487179486,
+    "test_precision": 91.43526586886644,
+    "test_recall": 85.17094017094018,
+    "test_f1": 87.02341724880279,
+    "target_accuracy": 87,
+    "status": "PASS"
+  },
+  {
+    "DATA": "chest",
+    "MODEL": "VGG16",
+    "test_accuracy": 89.74358974358975,
+    "test_precision": 92.74027577690882,
+    "test_recall": 86.41025641025641,
+    "test_f1": 88.3177515416028,
+    "target_accuracy": 87,
+    "status": "PASS"
+  },
+  {
+    "DATA": "chest",
+    "MODEL": "ResNet18",
+    "test_accuracy": 87.01923076923077,
+    "test_precision": 90.90481321349174,
+    "test_recall": 82.86324786324786,
+    "test_f1": 84.91615610274347,
+    "target_accuracy": 87,
+    "status": "PASS"
+  },
+  {
+    "DATA": "lesions",
+    "MODEL": "AlexNet",
+    "test_accuracy": 73.86533665835412,
+    "test_precision": 51.02409968377143,
+    "test_recall": 36.944499376182875,
+    "test_f1": 40.113996438103946,
+    "target_accuracy": 67,
+    "status": "PASS"
+  },
+  {
+    "DATA": "lesions",
+    "MODEL": "VGG16",
+    "test_accuracy": 70.17456359102245,
+    "test_precision": 28.68541747212635,
+    "test_recall": 29.69447625345522,
+    "test_f1": 27.603776923504814,
+    "target_accuracy": 67,
+    "status": "PASS"
+  },
+  {
+    "DATA": "lesions",
+    "MODEL": "ResNet18",
+    "test_accuracy": 72.66832917705736,
+    "test_precision": 47.140507087367304,
+    "test_recall": 43.28764360879042,
+    "test_f1": 40.26890439534602,
+    "target_accuracy": 67,
+    "status": "PASS"
+  },
+  {
+    "DATA": "orgs",
+    "MODEL": "AlexNet",
+    "test_accuracy": 87.18354430379746,
+    "test_precision": 86.09505909151297,
+    "test_recall": 84.89286457410948,
+    "test_f1": 85.10981150599754,
+    "target_accuracy": 83,
+    "status": "PASS"
+  },
+  {
+    "DATA": "orgs",
+    "MODEL": "VGG16",
+    "test_accuracy": 89.07010710808179,
+    "test_precision": 87.93831987973276,
+    "test_recall": 86.95284908743783,
+    "test_f1": 87.08283025677953,
+    "target_accuracy": 83,
+    "status": "PASS"
+  },
+  {
+    "DATA": "orgs",
+    "MODEL": "ResNet18",
+    "test_accuracy": 90.59152872444012,
+    "test_precision": 89.6887711031069,
+    "test_recall": 89.00675178115492,
+    "test_f1": 89.0801797617286,
+    "target_accuracy": 83,
+    "status": "PASS"
+  }
+]
