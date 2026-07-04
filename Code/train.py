@@ -4,7 +4,7 @@ MAI/IDL SS26 - Final assignment.
 MG 6/6/2026
 """
 import json
-
+import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -38,6 +38,11 @@ def main():
 
         trainer = Trainer(model, criterion, optimizer, device)
         trainer.fit(train_loader, val_loader, epochs=config["EPOCHS"])
+        
+        os.makedirs("checkpoints", exist_ok=True)
+        checkpoint_path = f"checkpoints/{run['DATA']}_{run['MODEL']}.pt"
+        torch.save(model.state_dict(), checkpoint_path)
+        print(f"Model checkpoint saved to {checkpoint_path}")
 
 if __name__ == "__main__":
     main()
