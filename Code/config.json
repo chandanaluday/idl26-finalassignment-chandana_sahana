@@ -9,14 +9,18 @@
     { "DATA": "cells",   "MODEL": "AlexNet",  "CHANNELS": 3, "NUM_CLASSES": 8 },
     { "DATA": "cells",   "MODEL": "VGG16",    "CHANNELS": 3, "NUM_CLASSES": 8 },
     { "DATA": "cells",   "MODEL": "ResNet18", "CHANNELS": 3, "NUM_CLASSES": 8 },
+    { "DATA": "cells",   "MODEL": "GreenNet", "CHANNELS": 3, "NUM_CLASSES": 8 },
     { "DATA": "chest",   "MODEL": "AlexNet",  "CHANNELS": 1, "NUM_CLASSES": 2 },
     { "DATA": "chest",   "MODEL": "VGG16",    "CHANNELS": 1, "NUM_CLASSES": 2 },
     { "DATA": "chest",   "MODEL": "ResNet18", "CHANNELS": 1, "NUM_CLASSES": 2 },
+    { "DATA": "chest",   "MODEL": "GreenNet", "CHANNELS": 1, "NUM_CLASSES": 2 },
     { "DATA": "lesions", "MODEL": "AlexNet",  "CHANNELS": 3, "NUM_CLASSES": 7 },
     { "DATA": "lesions", "MODEL": "VGG16",    "CHANNELS": 3, "NUM_CLASSES": 7 },
     { "DATA": "lesions", "MODEL": "ResNet18", "CHANNELS": 3, "NUM_CLASSES": 7 },
+    { "DATA": "lesions", "MODEL": "GreenNet", "CHANNELS": 3, "NUM_CLASSES": 7 },
     { "DATA": "orgs",    "MODEL": "AlexNet",  "CHANNELS": 1, "NUM_CLASSES": 11 },
     { "DATA": "orgs",    "MODEL": "VGG16",    "CHANNELS": 1, "NUM_CLASSES": 11 },
-    { "DATA": "orgs",    "MODEL": "ResNet18", "CHANNELS": 1, "NUM_CLASSES": 11 }
+    { "DATA": "orgs",    "MODEL": "ResNet18", "CHANNELS": 1, "NUM_CLASSES": 11 },
+    { "DATA": "orgs",    "MODEL": "GreenNet", "CHANNELS": 1, "NUM_CLASSES": 11 }
   ]
 }
