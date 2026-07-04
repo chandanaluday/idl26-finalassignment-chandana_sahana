@@ -40,9 +40,16 @@ def main():
         trainer.fit(train_loader, val_loader, epochs=config["EPOCHS"])
         
         os.makedirs("checkpoints", exist_ok=True)
-        checkpoint_path = f"checkpoints/{run['DATA']}_{run['MODEL']}.pt"
+        #checkpoint_path = f"checkpoints/{run['DATA']}_{run['MODEL']}.pt"
+        checkpoint_path = f"checkpoints/{run['DATA']}_{run['MODEL']}_epoch{config['EPOCHS']}.pt"
         torch.save(model.state_dict(), checkpoint_path)
         print(f"Model checkpoint saved to {checkpoint_path}")
+        
+        os.makedirs("logs", exist_ok=True) #added
+        log_path = f"logs/{run['DATA']}_{run['MODEL']}_epoch{config['EPOCHS']}_history.json" #added
+        with open(log_path, "w") as f: #added
+            json.dump(trainer.history, f, indent=2) #added
+        print(f"Training history saved to {log_path}") #added
 
 if __name__ == "__main__":
     main()

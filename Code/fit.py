@@ -3,6 +3,8 @@ MAI/IDL SS26 - Final assignment.
 
 MG 6/6/2026
 """
+
+import copy #added
 import torch
 
 class Trainer:
@@ -11,6 +13,10 @@ class Trainer:
         self.criterion = criterion
         self.optimizer = optimizer
         self.device = device
+        
+        self.best_val_acc = -1.0 #added
+        self.best_state_dict = None #added
+        self.history = {"train_loss": [], "train_acc": [], "val_loss": [], "val_acc": []} #added
 
     def train_one_epoch(self, dataloader):
         self.model.train()
@@ -66,9 +72,24 @@ class Trainer:
             train_loss, train_acc = self.train_one_epoch(train_loader)
             val_loss, val_acc = self.evaluate(val_loader)
             
+            self.history["train_loss"].append(train_loss) #added
+            self.history["train_acc"].append(train_acc) #added
+            self.history["val_loss"].append(val_loss) #added
+            self.history["val_acc"].append(val_acc) #added
+
+            if val_acc > self.best_val_acc: #added
+                self.best_val_acc = val_acc #added
+                self.best_state_dict = copy.deepcopy(self.model.state_dict()) #added
+            
+            #print(f"Epoch [{epoch+1:02d}/{epochs:02d}] | " "Train Loss: {train_loss:.4f} - Train Acc: {train_acc:.2f}% | " f"Val Loss: {val_loss:.4f} - Val Acc: {val_acc:.2f}%")
+            marker = " *" if val_acc == self.best_val_acc else ""
             print(f"Epoch [{epoch+1:02d}/{epochs:02d}] | "
                   f"Train Loss: {train_loss:.4f} - Train Acc: {train_acc:.2f}% | "
-                  f"Val Loss: {val_loss:.4f} - Val Acc: {val_acc:.2f}%")
+                  f"Val Loss: {val_loss:.4f} - Val Acc: {val_acc:.2f}%{marker}")
         
         print("-" * 50)
-        print("Training Complete!")
+        #print("Training Complete!")
+        print(f"Training Complete! Best Val Acc: {self.best_val_acc:.2f}%")
+
+        if self.best_state_dict is not None: #added
+            self.model.load_state_dict(self.best_state_dict) #added
