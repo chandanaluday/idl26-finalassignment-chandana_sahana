@@ -15,14 +15,15 @@ def get_loaders(data, data_path, batch_size, val_split=0.1):
     val_size = int(total_samples * val_split)
     val_start = total_samples - val_size
 
-    train_data = data_dict['train_images']
-    train_labels = data_dict['train_labels']
+    train_data = data_dict['train_images'][:val_start] #added
+    train_labels = data_dict['train_labels'][:val_start].squeeze(1)  #added
     val_data = data_dict['train_images'][val_start:]
-    val_labels = data_dict['train_labels'][val_start:]
+    val_labels = data_dict['train_labels'][val_start:].squeeze(1) #added
     
     train_dataset = TensorDataset(train_data, train_labels)
     val_dataset = TensorDataset(val_data, val_labels)
-    test_dataset = TensorDataset(data_dict['test_images'], data_dict['test_labels'])
+    #test_dataset = TensorDataset(data_dict['test_images'], data_dict['test_labels'])
+    test_dataset = TensorDataset(data_dict['test_images'], data_dict['test_labels'].squeeze(1))
     
     train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False)
