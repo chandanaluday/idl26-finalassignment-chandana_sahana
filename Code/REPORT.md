@@ -81,3 +81,33 @@ GreenNet achieves a **76x to 319x reduction in parameter count** across all four
 ### Trade-off Summary
 
 GreenNet demonstrates that a dramatically simplified architecture — using well-established efficiency techniques (depthwise separable convolutions) rather than ad-hoc simplification — can match or exceed the accuracy of substantially larger models on 3 of 4 diagnostic imaging tasks, while using 76-319x fewer parameters. This supports deployment on resource-constrained diagnostic devices, where memory footprint and energy consumption are critical constraints, without a meaningful sacrifice in diagnostic accuracy for cells, lesions, and organs classification. The one exception (`chest`) suggests that binary classification tasks may benefit from slightly more model capacity than GreenNet's current configuration provides — a worthwhile direction for future architecture tuning.
+
+## Data-Scarcity Post-Mortem: The "organs" Dataset
+
+### Background
+
+A new dataset (`organs`) was introduced with only 500 training images and 200 test images across the same 11 organ classes as the existing, much larger `orgs` dataset. Direct training on a dataset this small risks severe overfitting and poor generalization, since a deep architecture like ResNet18 has far more learnable parameters than there are training examples to constrain them.
+
+### Strategy Comparison
+
+Two training strategies were evaluated on identical train/val/test splits of the `organs` dataset:
+
+| Strategy | Description | Test Accuracy | Test F1-Score | Target (40%) |
+|---|---|---|---|---|
+| From Scratch | Fresh ResNet18, randomly initialized, trained only on the 500 `organs` samples | 29.00% | 21.27% | FAIL |
+| Transfer Learning | ResNet18 initialized from the existing `orgs_ResNet18` checkpoint (trained on thousands of images), fine-tuned on the 500 `organs` samples at a reduced learning rate (10% of the standard rate) | **57.50%** | **50.42%** | PASS |
+
+### Analysis
+
+Transfer learning **nearly doubled test accuracy** (29.00% → 57.50%) and **more than doubled the macro F1-score** (21.27% → 50.42%) compared to training from scratch, using the identical 500-sample training set. This demonstrates that structural features learned from the larger `orgs` dataset (edge detectors, texture patterns, and shape representations relevant to organ imaging) transferred effectively to the smaller, related `organs` dataset.
+
+The from-scratch model's validation accuracy fluctuated wildly across epochs (6% → 42% → 20% → 28%), a classic symptom of a deep network attempting to learn from too few examples: the model has enough capacity to memorize the small training set but insufficient data to learn generalizable patterns, leading to unstable, unreliable performance on unseen validation images. In contrast, the transfer-learned model's validation accuracy improved steadily and smoothly (66% → 80%) across training, indicating a much more stable optimization process — consistent with starting from an already-informed set of weights rather than random initialization.
+
+Only the transfer learning strategy met the assignment's 40% minimum accuracy target for this dataset; training from scratch fell short by 11 percentage points.
+
+### Recommendations for Future Data Collection
+
+- **Prioritize transfer learning as the default strategy** for any future low-sample datasets sharing structural similarity (same imaging modality, same or overlapping classes) with existing larger datasets.
+- **A lower fine-tuning learning rate (10% of standard) was important** for stable adaptation — aggressive fine-tuning risks overwriting useful pretrained features before the small dataset can meaningfully influence the model.
+- **As more `organs` samples become available**, periodically re-evaluate whether continuing to fine-tune from the `orgs` checkpoint remains beneficial, or whether training a dedicated model becomes viable once sample size grows sufficiently.
+- **Data augmentation** (rotations, flips, slight zoom/crop) was not applied in this experiment and represents a promising next step for further improving performance on such a small dataset, since it can effectively multiply the number of training examples the model sees.
