@@ -8,6 +8,23 @@ import torch.nn as nn
 
 activation_str = "Identity"  # Placeholder for activation function, can be replaced with "ReLU" or others as needed.
 
+class DepthwiseSeparableConv(nn.Module):
+    """Depthwise separable convolution: a lightweight replacement for standard nn.Conv2d.
+    Splits a full convolution into a per-channel spatial pass (depthwise) followed by
+    a 1x1 channel-mixing pass (pointwise) - dramatically fewer multiplications per pixel.
+    """
+    def __init__(self, in_channels, out_channels, stride=1):
+        super().__init__()
+        self.depthwise = nn.Conv2d(in_channels, in_channels, kernel_size=3, stride=stride, padding=1, groups=in_channels, bias=False)
+        self.pointwise = nn.Conv2d(in_channels, out_channels, kernel_size=1, bias=False)
+        self.bn = nn.BatchNorm2d(out_channels)
+        self.relu = nn.ReLU(inplace=True)
+
+    def forward(self, x):
+        x = self.depthwise(x)
+        x = self.pointwise(x)
+        x = self.bn(x)
+        return self.relu(x)
 
 class VGGBlock(nn.Module):
     """Modular VGG block with configurable number of conv layers and channels.
@@ -193,3 +210,37 @@ class ResNet18(nn.Module):
         out = torch.flatten(out, 1)
         #self.classifier(out)
         return self.classifier(out)  # added
+
+class GreenNet(nn.Module):
+    """Lightweight CNN using depthwise separable convolutions, designed to drastically
+    reduce parameter count and computational cost while retaining reasonable accuracy -
+    proposed as part of the Green Initiative efficiency requirements.
+    """
+    def __init__(self, in_channels, num_classes, **kwargs):
+        super().__init__()
+
+        drop_rate = kwargs.get("drop_rate", 0.5)
+
+        self.features = nn.Sequential(
+            nn.Conv2d(in_channels, 32, kernel_size=3, stride=2, padding=1, bias=False),  # one regular conv as the "stem" (first layer stays regular - depthwise separable is not efficient on very few input channels)
+            nn.BatchNorm2d(32),
+            nn.ReLU(inplace=True),
+
+            DepthwiseSeparableConv(32, 64, stride=1),
+            DepthwiseSeparableConv(64, 64, stride=2),
+            DepthwiseSeparableConv(64, 128, stride=1),
+            DepthwiseSeparableConv(128, 128, stride=2),
+        )
+
+        self.global_pool = nn.AdaptiveAvgPool2d((1, 1))
+
+        self.classifier = nn.Sequential(
+            nn.Dropout(p=drop_rate),
+            nn.Linear(128, num_classes)
+        )
+
+    def forward(self, x):
+        x = self.features(x)
+        x = self.global_pool(x)
+        x = torch.flatten(x, 1)
+        return self.classifier(x)
