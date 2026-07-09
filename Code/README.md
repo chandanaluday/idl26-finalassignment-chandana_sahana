@@ -16,13 +16,13 @@ Code/
 ├── models.py                # AlexNet, VGG16, ResNet18 architectures
 ├── fit.py                   # Trainer class: training loop, validation, best-checkpoint tracking
 ├── train.py                 # Main training script — loops over all dataset/model combinations
-├── evaluate.py               # Test-set evaluation — computes accuracy, precision, recall, F1
-├── config.json               # All hyperparameters and dataset/model run configurations
-├── AUDIT_LOG.md               # Full bug audit: symptoms, root causes, fixes, commit hashes
-├── REPORT.md                  # Benchmark results, analysis, architectural recommendations
-├── checkpoints/                # Saved model weights per run (gitignored, generated locally)
-├── logs/                       # Per-run training history (JSON, loss/accuracy per epoch)
-└── evaluation_results.json      # Final test-set metrics for all 12 combinations
+├── evaluate.py              # Test-set evaluation — computes accuracy, precision, recall, F1
+├── config.json              # All hyperparameters and dataset/model run configurations
+├── AUDIT_LOG.md             # Full bug audit: symptoms, root causes, fixes, commit hashes
+├── REPORT.md                # Benchmark results, analysis, architectural recommendations
+├── checkpoints/             # Saved model weights per run (gitignored, generated locally)
+├── logs/                    # Per-run training history (JSON, loss/accuracy per epoch)
+└── evaluation_results.json  # Final test-set metrics for all 12 combinations
 ```
 
 
