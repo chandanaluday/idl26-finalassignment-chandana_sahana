@@ -1,5 +1,5 @@
 {
-  "DATA_PATH": "/Users/shreyas/Downloads/data",
+  "DATA_PATH": "C:/Users/Lenovo/Downloads/DEEP_LEARNING_FINAL_PORTFOLIO/idl26-finalassignment-chandana_sahana/data",
   "BATCH_SIZE": 64,
   "LEARNING_RATE": 0.001,
   "EPOCHS": 10,

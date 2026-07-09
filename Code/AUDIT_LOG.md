@@ -1,23 +1,128 @@
-# Incident Audit Log — Operation Cyber-Histology
+# Audit Log — Operation Cyber-Histology
 
-| File | Symptom | Root Cause | Fix | Commit |
-|---|---|---|---|---|
-| data.py | Validation accuracy misleadingly high; model implicitly trained on its own validation data | Val split was not excluded from train_data slice — both used the full array, causing overlap (data leak) | Sliced train_data to `[:val_start]` so train and val no longer overlap | `66e4861` |
-| data.py | CrossEntropyLoss crashes or silently misaligns shapes | Labels loaded with shape (N,1) instead of (N,) expected by CrossEntropyLoss | Added `.squeeze(1)` to train/val/test labels | `66e4861` |
-| models.py | VGG16 crashes with channel mismatch (RuntimeError) | VGGBlock never updated `current_in_channels` between conv layers within the same block | Added `current_in_channels = out_channels` at the end of each loop iteration | `a6b508f` |
-| models.py | VGG16's "Config C" tail layer produces misaligned spatial dimensions, causing downstream shape crashes | 1x1 tail conv layer used the same padding as 3x3 layers instead of 0 | Added `conv_padding = 0 if is_config_c_tail else padding` | `a6b508f` |
-| models.py | AlexNet crashes on any non-RGB dataset (chest, orgs); produces wrong number of output classes for others | `__init__(self, **kwargs)` never read in_channels/num_classes; both hardcoded (3 channels, 11 classes) | Added explicit `in_channels, num_classes` parameters, used throughout | `a6b508f` |
-| models.py | AlexNet and VGG16 crash immediately with shape mismatch in classifier | Classifier's first Linear layer assumed a fixed flattened size (2048) tied to one specific input resolution | Added `nn.AdaptiveAvgPool2d((1,1))` before flatten; fixed Linear input size to match actual channel count | `a6b508f` |
-| models.py | ResNet18 has zero non-linearity; behaves like a single linear layer, cannot learn complex patterns | `activation_str` read from a hardcoded module-level global ("Identity") instead of from kwargs | Read `activation_str` from `kwargs.get("activation_str", "ReLU")` inside `__init__` | `a6b508f` |
-| models.py | ResNet18 crashes with TypeError when computing loss | `forward()` computed the classifier output but never returned it (implicit `None` return) | Added `return` before `self.classifier(out)` | `a6b508f` |
-| fit.py | Loss explodes / becomes NaN within first epoch | `optimizer.zero_grad()` never called; gradients accumulated across batches instead of resetting | Added `self.optimizer.zero_grad()` before each batch's forward/backward pass | `3aa7c42` |
-| fit.py | Latent bug risk; crashes if built-in `sum()` is ever used later in the same method | Local variable named `sum` shadowed Python's built-in `sum()` function | Renamed variable to `total` | `3aa7c42` |
-| data.py | FileNotFoundError when loading any dataset | Code expected filenames like `{data}_data.pt`, but actual files are named `{data}.pt` | Changed filename pattern to `f"{data}.pt"` | `dc6ee9d` |
-| train.py | Only one dataset/model combination ever trains; must manually edit config and rerun 12 times | `config["DATA"]`/`config["MODEL"]` read as single values, not part of a loop | Restructured config.json with a `RUNS` list; added `for run in config["RUNS"]:` loop | `7313ead` |
-| train.py | ResNet18 crashes with TypeError (`None` passed as activation name); all models trained with 99% dropout, learning almost nothing | `drop_rate` hardcoded to `0.99`; `activation_str` hardcoded to `None` | Both now read from config: `config.get("DROP_RATE", 0.5)`, `config.get("ACTIVATION", "ReLU")` | `7313ead` |
-| — | Missing configuration file entirely (deleted per incident report) | N/A — infrastructure gap, not a code bug | Created `config.json` with full 12-run RUNS list and all hyperparameters | `7313ead` |
-| train.py | Training runs on CPU even when a compatible GPU is available, causing significantly slower training | Device selection only checked for CUDA, not Apple Silicon's MPS backend | Added `mps` as a fallback check before defaulting to `cpu` | `e2177b6` |
-| train.py | Trained models are lost after each run; nothing available to evaluate or benchmark later | No checkpoint-saving logic existed after training completed | Added `torch.save(model.state_dict(), checkpoint_path)` per run, saved to `checkpoints/` | `c6a43ea` |
-| fit.py | Final saved model may not be the best-performing one seen during training (risk of capturing an overfit/degraded epoch) | No tracking of best validation accuracy across epochs; only the final epoch's weights were ever used | Added `best_val_acc` / `best_state_dict` tracking via `copy.deepcopy`; restores best weights after training completes | `8738cfa` |
-| fit.py / train.py | No way to review or chart per-epoch training behavior after the fact | No history logging existed; only printed to terminal and lost afterward | Added `self.history` dict in Trainer; saved to `logs/{data}_{model}_epoch{N}_history.json` per run | `8738cfa` |
-| — | Test set (`test_loader`) created but never used anywhere in the pipeline | No evaluation script existed to measure real generalization performance | Created `evaluate.py`: loads each checkpoint, evaluates on test set, computes accuracy/precision/recall/macro-F1 for all 12 combos | `df5adad` |
+This pipeline had a bunch of bugs stacked on top of each other. Here's a list of each one we found. Below is what the code looked like before and after the fix.
+
+---
+
+### 1. Data leak between train and validation sets (data.py, commit 66e4861)
+
+Validation accuracy was way too good, which is usually a sign
+something's wrong rather than something to celebrate. The training slice
+wasn't actually excluding the validation portion --- both were pulling
+from the full array, so the model was quietly being tested on data it
+had already seen.
+
+**Before:** train_data = full_data (no exclusion of validation portion)
+
+**After:** train_data = full_data\[:val_start\]
+
+### 2. Label shape mismatch (data.py, commit 66e4861)
+
+Right after that, CrossEntropyLoss started acting up --- crashing or
+misbehaving depending on the run. Labels were shaped (N,1) when (N,) was
+expected.
+
+**Before:** labels used as-is with shape (N,1)
+
+**After:** labels.squeeze(1) applied to train/val/test labels, giving
+shape (N,)
+
+### 3. VGG16 channel mismatch (models.py, commit a6b508f)
+
+VGG16 kept throwing a channel-mismatch error. VGGBlock wasn't updating
+current_in_channels between conv layers within the same block, so
+channel counts drifted out of sync.
+
+**Before:** current_in_channels left unchanged across conv layers in the
+same block.
+
+**After:** current_in_channels = out_channels added at the end of each
+loop iteration.
+
+### 4. VGG16 tail layer padding (models.py, commit a6b508f)
+
+The "Config C" tail layer was throwing off spatial dimensions and
+breaking things further down the network. It was using the same padding
+as the regular 3x3 layers instead of 0 for its 1x1 conv.
+
+**Before:** conv_padding = padding (same padding used for all conv
+layers, including the 1x1 tail)
+
+**After:** conv_padding = 0 if is_config_c_tail else padding
+
+### 5. AlexNet hardcoded channels/classes (models.py, commit a6b508f)
+
+AlexNet flat-out refused to run on any non-RGB dataset (chest, orgs),
+and gave the wrong number of output classes elsewhere too. in_channels
+and num_classes were hardcoded to 3 and 11 --- never actually pulled
+from kwargs.
+
+**Before:** in_channels = 3, num_classes = 11 (hardcoded inside
+**init**(self, \*\*kwargs))
+
+**After:** in_channels and num_classes added as explicit parameters,
+read from kwargs and used throughout the class
+
+### 6. Classifier input size assumption (models.py, commit a6b508f)
+
+AlexNet and VGG16 both crashed with shape mismatches in the classifier
+layer. The first Linear layer assumed one specific flattened size
+(2048), tied to a single input resolution.
+
+**Before:** nn.Linear(2048, ...) directly after flattening, with no
+pooling step
+
+**After:** nn.AdaptiveAvgPool2d((1,1)) added before flatten; Linear
+layer's input size corrected to match the actual channel count
+
+### 7. ResNet18 missing activation (models.py, commit a6b508f)
+
+ResNet18 basically wasn't learning anything --- no non-linearity at all,
+so it was acting like a glorified linear layer. The activation was being
+pulled from a hardcoded global set to "Identity" instead of from kwargs.
+
+**Before:** activation_str = "Identity" (hardcoded module-level global)
+
+**After:** activation_str = kwargs.get("activation_str", "ReLU") read
+inside **init**
+
+### 8. ResNet18 missing return statement (models.py, commit a6b508f)
+
+On top of that, ResNet18 threw a TypeError during loss computation.
+forward() was computing the output but never actually returning it ---
+so it silently returned None.
+
+**Before:** self.classifier(out) computed but not returned (implicit
+return None)
+
+**After:** return self.classifier(out)
+
+### 9. Optimizer not resetting gradients (fit.py, commit 3aa7c42)
+
+Loss went straight to NaN within the first epoch --- a classic sign of
+exploding gradients. optimizer.zero_grad() was never being called, so
+gradients kept piling up across batches instead of resetting.
+
+**Before:** training loop went straight from forward pass to .backward()
+with no gradient reset
+
+**After:** self.optimizer.zero_grad() added before each batch's
+forward/backward pass
+
+### 10. Shadowed built-in variable (fit.py, commit 3aa7c42)
+
+Variable named sum was quietly shadowing Python's built-in sum().
+
+**Before:** sum = 0 used as a running total variable name
+
+**After:** renamed to total = 0
+
+### 11. Filename pattern mismatch (data.py, commit dc6ee9d)
+
+Every single dataset load failed with FileNotFoundError. The code was
+looking for files named {data}\_data.pt, but the actual files were just
+{data}.pt.
+
+**Before:** filename = f"{data}\_data.pt"
+
+**After:** filename = f"{data}.pt"
